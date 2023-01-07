@@ -1,0 +1,10 @@
+*
+!.gitignore
+!README.md
+!meson.build
+
+!include
+!include/*
+
+!test
+!test/*
