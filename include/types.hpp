@@ -24,5 +24,12 @@ using f64 = double;
 template<typename Fn, typename... Args>
 using Invoke = std::invoke_result_t<Fn, Args...>;
 
-template<typename Fn, typename... Args>
-using CanInvoke = std::is_invocable<Fn, Args...>;
+template<typename Return, typename Fn, typename... Args>
+concept IsFn = requires (Fn fn, Args... args) {
+  { fn(args...) } -> std::same_as<Return>;
+};
+
+template<typename Fn, typename... Args> 
+concept CanInvoke = requires (Fn fn, Args... args) {
+  { fn(args...) };
+};

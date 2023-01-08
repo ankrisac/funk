@@ -27,11 +27,32 @@ public:
   }
 
   template<typename Fn> 
+    requires CanInvoke<Fn, T> 
+  Option if_some(Fn fn) {
+    if(has_value) {
+      std::invoke(fn, value);
+    }
+    return *this;
+  }
+  template<typename Fn> 
+    requires CanInvoke<Fn, T> 
+  Option if_none() {
+    if(has_value) {
+      std::invoke();
+    }
+    return *this;
+  }
+
+  inline bool contains(T val) {
+    return has_value && value == val;
+  }
+
+  template<typename Fn> 
   Option<Invoke<Fn, T>> map(Fn fn) {
     return has_value ? Some(std::invoke(fn, value)) : None;
   }
   template<typename Pred>
-    requires std::same_as<Invoke<Pred, T>, bool> 
+    requires IsFn<bool, Pred, T> 
   Option<T> filter(Pred pred) {
     return (has_value && pred(value)) ? Some(value) : None;
   }
@@ -40,23 +61,8 @@ public:
   Invoke<Fn, T> and_then(Fn fn) {
     return has_value ? std::invoke(fn, value) : None;
   }
-  Option and_take(Option<T> value) {
+  Option and_take(Option value) {
     return has_value ? value : None;
-  }
-
-  template<typename Fn> 
-    requires CanInvoke<Fn, T> 
-  Option inspect_some(Fn fn) {
-    if(has_value) {
-      std::invoke(fn, value);
-    }
-  }
-  template<typename Fn> 
-    requires CanInvoke<Fn> 
-  Option inspect_none() {
-    if(has_value) {
-      std::invoke()
-    }
   }
 };
 
