@@ -19,16 +19,23 @@ public:
     return out << "None";
   }
 
-  inline bool is_some() {
+  T& get_some() {
+    return value;
+  }
+  const T& get_some() const {
+    return value;
+  }
+
+  inline bool is_some() const {
     return has_value;
   }
-  inline bool is_none() {
+  inline bool is_none() const {
     return !has_value;
   }
 
   template<typename Fn> 
     requires CanInvoke<Fn, T> 
-  Option if_some(Fn fn) {
+  Option if_some(Fn fn) const {
     if(has_value) {
       std::invoke(fn, value);
     }
@@ -36,32 +43,33 @@ public:
   }
   template<typename Fn> 
     requires CanInvoke<Fn, T> 
-  Option if_none() {
+  Option if_none() const {
     if(has_value) {
-      std::invoke();
+      std::invoke<Fn, T>(fn);
     }
     return *this;
   }
 
-  inline bool contains(T val) {
+  inline bool contains(T val) const {
     return has_value && value == val;
   }
 
   template<typename Fn> 
-  Option<Invoke<Fn, T>> map(Fn fn) {
+    requires CanInvoke<Fn, T>
+  Option<Invoke<Fn, T>> map(Fn fn) const {
     return has_value ? Some(std::invoke(fn, value)) : None;
   }
   template<typename Pred>
     requires IsFn<bool, Pred, T> 
-  Option<T> filter(Pred pred) {
+  Option<T> filter(Pred pred) const {
     return (has_value && pred(value)) ? Some(value) : None;
   }
 
   template<typename Fn> 
-  Invoke<Fn, T> and_then(Fn fn) {
-    return has_value ? std::invoke(fn, value) : None;
+  Invoke<Fn, T> and_then(Fn fn) const {
+    return has_value ? std::invoke<Fn, T>(fn, value) : None;
   }
-  Option and_take(Option value) {
+  Option and_take(Option value) const {
     return has_value ? value : None;
   }
 };
