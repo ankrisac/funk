@@ -1,3 +1,3 @@
 # Funk
 
-A header-only collections library for C++20 inspired by Rust
+A header-only minimalist collections & algorithms library for C++20 inspired by Rust, Linq & Haskell

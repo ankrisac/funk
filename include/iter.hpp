@@ -5,52 +5,45 @@
 template<typename It>
 concept Iter = requires(It it, size_t n) {
   { it.next() } -> std::same_as<Option<typename It::Item>>;
-  { it.next(n) } -> std::same_as<Option<typename It::Item>>;
+  { it.nth(n) } -> std::same_as<Option<typename It::Item>>;
 };
 
 
 template<typename It>
-struct DefaultImpl : public {
-
-  
-  Option<Item> next() {
-    return next(1);
-  }
-  Option<Item> next(size_t n) {
-
+struct DefaultImpl : public It {
+  Option<typename It::Item> nth(size_t n) {
+    for(size_t i = 1; i < n; i++) {
+      if (static_cast<It>(this)->next().is_some()) break;
+    }
+    return static_cast<It>(this)->next();
   }
 };
 
 
 template<Iter It, typename Fn>
-struct Map : DefaultImpl<Item> {
+struct Map : DefaultImpl<Map<It, Fn>> {
   using Item = Invoke<Fn, typename It::Item>;
   
   It it;
   Fn fn;
 
-  Option<Item> next(size_t n) {
-    return it.next(n).map(fn);
+  Option<Item> next() {
+    return it.next().map(fn);
+  }
+
+  Option<Item> nth(size_t n) {
+    return it.nth(n).map(fn);
   }
 };
 
 template<Iter It, typename Pred>
-struct Filter {
+struct Filter : DefaultImpl<Filter<It, Pred>> {
   using Item = typename It::Item;
   
   It it;
   Pred pred;
 
   Option<Item> next() {
-    while(true) {
-      auto opt = it.next(); 
-      if(opt.is_none()) return None;
-      else if (pred(opt.get_some())) {
-        return opt;
-      }
-    }
-  }
-  Option<Item> next(size_t n) {
     while(true) {
       auto opt = it.next(); 
       if(opt.is_none()) return None;
@@ -66,14 +59,22 @@ struct Skip {
   using Item = typename It::Item;
 
   It it;
+
   size_t count;
   
   Option<Item> next() {
-    if(!skipped) {
-      it.next(count);
+    if(count != 0) {
+      it.nth(count);
       count = 0;
     }
     return it.next();
+  }
+  Option<Item> nth(size_t n) {
+    if(count != 0) {
+      it.nth(count);
+      count = 0;
+    }
+    return it.nth(n);
   }
 };
 
@@ -85,10 +86,19 @@ struct Take {
   size_t remaining;
 
   Option<Item> next() {
+    remaining 
+
     if (remaining > 0) {
       remaining--;
       return it.next();
     }
+    return None;
+  }
+  Option<Item> nth(size_t n) {
+    if (remaining > n) {
+      remaining -= 
+    }
+    remaining = 0;
     return None;
   }
 };
@@ -96,13 +106,14 @@ struct Take {
 template<Iter It>
 struct IterInterface {
   using Item = typename It::Item;
+
   It impl;
 
   Option<Item> next() {
     return impl.next();
   }
-  Option<Item> next(size_t n) {
-    return impl.next(n);
+  Option<Item> nth(size_t n) {
+    return impl.nth(n);
   }
 
   template<typename Fn>
