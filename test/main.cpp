@@ -1,8 +1,10 @@
 #include <iostream> 
 
-#include "../include/types.hpp"
-#include "../include/option.hpp"
-#include "../include/iter.hpp"
+#include "../include/Types.hpp"
+#include "../include/Option.hpp"
+#include "../include/Iter.hpp"
+
+#include <limits>
 
 template<typename T> 
 struct Range {
@@ -14,12 +16,8 @@ struct Range {
     return nth(0);
   }
   Option<T> nth(size_t n) {
-    if (cur < end) {
-      T out = cur;
-      cur += n + 1;
-      return Some(out);
-    }
-    return None;
+    cur = saturating_add(cur, n)  
+    return (cur < end) ? Some(cur) : None;
   }
 };
 
@@ -30,10 +28,25 @@ IterInterface<Range<T>> range(T upper, T lower) {
   };
 }
 
+
+template<typename T>
+T saturating_add(T a, T b) {
+  if (a > std::numeric_limits<T>::max() - b) {
+    return std::numeric_limits<T>::max();
+  }
+  return a + b;
+}
+template<typename T>
+T saturating_sub(T a, T b) {
+  if (a < std::numeric_limits<T>::min() + b) {
+    return std::numeric_limits<T>::min();
+  } 
+  return a - b;
+}
+
 int main() {
-  range(0, 100)
-    .skip(10)
-    .for_each([](auto x) { std::cout << x << std::endl; });
+
+
 
   return 0;
 }

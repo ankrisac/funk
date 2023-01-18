@@ -19,3 +19,16 @@ executable(
 funk_dep = declare_dependency(
   include_directories: include
 )
+
+
+unit_tests = [
+  'Integer'
+]
+
+foreach name : tests 
+  exe = executable(
+    name, 'test' / name + '.cpp',
+    include_directories: include
+  )
+  test(name, exe)
+endforeach

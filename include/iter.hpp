@@ -1,11 +1,10 @@
 #pragma once
-#include "types.hpp"
-#include "option.hpp"
+#include "Types.hpp"
+#include "Option.hpp"
 
 template<typename It>
 concept Iter = requires(It it, size_t n) {
-  { it.next() } -> std::same_as<Option<typename It::Item>>;
-  { it.nth(n) } -> std::same_as<Option<typename It::Item>>;
+  { it.next() } -> std::same_as<Option<typename It::Item>>;\
 };
 
 
@@ -30,7 +29,6 @@ struct Map : DefaultImpl<Map<It, Fn>> {
   Option<Item> next() {
     return it.next().map(fn);
   }
-
   Option<Item> nth(size_t n) {
     return it.nth(n).map(fn);
   }
@@ -55,7 +53,7 @@ struct Filter : DefaultImpl<Filter<It, Pred>> {
 };
 
 template<Iter It>
-struct Skip {
+struct Skip : DefaultImpl<It> {
   using Item = typename It::Item;
 
   It it;

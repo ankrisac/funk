@@ -1,5 +1,5 @@
 #pragma once
-#include "types.hpp"
+#include "Types.hpp"
 
 // Implicitly converts any Option<T>
 constexpr struct OptionNone {} None;
@@ -26,16 +26,16 @@ public:
     return value;
   }
 
-  inline bool is_some() const {
+  inline bool isSome() const {
     return has_value;
   }
-  inline bool is_none() const {
+  inline bool isNone() const {
     return !has_value;
   }
 
   template<typename Fn> 
     requires CanInvoke<Fn, T> 
-  Option if_some(Fn fn) const {
+  Option inspect_some(Fn fn) const {
     if(has_value) {
       std::invoke(fn, value);
     }
@@ -43,7 +43,7 @@ public:
   }
   template<typename Fn> 
     requires CanInvoke<Fn, T> 
-  Option if_none() const {
+  Option inspect_none() const {
     if(has_value) {
       std::invoke<Fn, T>(fn);
     }
